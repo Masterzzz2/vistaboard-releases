@@ -63,7 +63,7 @@ After installation, open `http://<PI-IP>:3000` in any browser.
 1. Download and install the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) on your computer
 2. Insert the MicroSD card
 3. In the Imager, select:
-   - **Device:** Raspberry Pi 5
+   - **Device:** Your Raspberry Pi model (2B, 3, 4 or 5)
    - **OS:** Raspberry Pi OS (64-bit) Desktop (under "Raspberry Pi OS (other)")
    - **Storage:** Your MicroSD card
 4. **Click the gear icon** (settings) before writing:
@@ -75,9 +75,9 @@ After installation, open `http://<PI-IP>:3000` in any browser.
 ### 2. Boot the Raspberry Pi
 
 1. Insert the SD card into the Pi
-2. Connect the monitor via HDMI (use the **left** HDMI port on Pi 5)
+2. Connect the monitor via HDMI (Pi 4/5: use the left Micro-HDMI port)
 3. Connect keyboard and mouse via USB
-4. Plug in the USB-C power supply - the Pi starts automatically
+4. Plug in the power supply - the Pi starts automatically
 5. Wait for the desktop to appear (~1-2 minutes on first boot)
 
 ### 3. Open Terminal
