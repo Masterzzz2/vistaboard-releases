@@ -4,6 +4,8 @@
 
 # VistaBoard - Smart Wall Display for Raspberry Pi
 
+**Latest stable release:** `v2.7.62`
+
 VistaBoard turns a Raspberry Pi 2B / 3 / 4 / 5 or a comparable Linux mini PC into a smart portrait wall display for calendar, weather, photos, news, quotes and energy data.
 
 It is designed for kitchens, hallways, offices, smart homes and PV/solar households that want one clean always-on screen instead of checking many separate apps.
@@ -53,6 +55,8 @@ The installer handles everything automatically:
 - VistaBoard download and configuration
 - Systemd service
 - Kiosk mode (fullscreen Chromium on reboot)
+- Runtime dependency installation with rollback-safe error handling
+- Local server readiness check before Chromium starts
 
 After installation, open `http://<PI-IP>:3000` in any browser.
 
@@ -102,6 +106,8 @@ Installation takes **5-15 minutes** depending on internet speed.
 
 When you see **"VistaBoard erfolgreich installiert!"** - you're done!
 
+Version `2.7.62` fixes the Raspberry Pi installer/runtime startup path. The package now ships a lean runtime `package.json`, installs required Node.js dependencies such as `dotenv`, detects the correct server entry file and waits until VistaBoard is reachable before starting fullscreen Chromium.
+
 ### 5. First Setup
 
 Open a browser (on the Pi or any device in the same network):
@@ -143,6 +149,10 @@ sudo systemctl restart vistaboard
 
 # Find your Pi's IP
 hostname -I
+
+# Installer diagnostics
+sudo journalctl -u vistaboard -n 80 --no-pager
+systemctl cat vistaboard
 ```
 
 ## Updates
@@ -172,6 +182,8 @@ VistaBoard is proprietary software with a 30-day free trial. See [www.vista-boar
 # Deutsch
 
 VistaBoard macht aus einem Raspberry Pi 2B / 3 / 4 / 5 oder einem vergleichbaren Linux-Mini-PC ein smartes Wanddisplay im Hochformat.
+
+**Aktuelle stabile Version:** `v2.7.62`
 
 Das Board zeigt Kalender, Wetter, Bilder, Nachrichten, Zitate und optional Energiedaten wie Fronius PV, Hausakku, Netzbezug, Einspeisung, Wallbox und Strompreise. Es ist gedacht fuer Kueche, Flur, Buero, Wohnzimmer, Technikraum oder Smart-Home-Installationen.
 
@@ -203,6 +215,8 @@ sudo bash vistaboard-install.sh
 Die ausfuehrliche Schritt-fuer-Schritt-Anleitung findest du auf der Homepage:
 
 [www.vista-board.com/installation](https://www.vista-board.com/installation)
+
+Version `2.7.62` behebt den Installer- und Startfehler auf Raspberry Pi. Das Updatepaket enthaelt jetzt nur noch die benoetigten Laufzeit-Abhaengigkeiten, installiert Pflichtpakete wie `dotenv`, erkennt die richtige Startdatei und wartet vor dem Kiosk-Start, bis VistaBoard lokal erreichbar ist.
 
 ## Download
 

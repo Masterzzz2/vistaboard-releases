@@ -151,11 +151,34 @@ mv "$APP_DIR/app.new"/.* "$APP_DIR/" 2>/dev/null || true
 rmdir "$APP_DIR/app.new" 2>/dev/null || true
 ok "VistaBoard entpackt nach $APP_DIR"
 
+# ── 4b. Startdatei erkennen ─────────────────────────────────────────────────
+APP_START=""
+for candidate in "$APP_DIR/index.js" "$APP_DIR/dist/index.js" "$APP_DIR/server/index.js"; do
+  if [[ -f "$candidate" ]]; then
+    APP_START="$candidate"
+    break
+  fi
+done
+
+if [[ -z "$APP_START" ]]; then
+  log "Gefundene Dateien im App-Verzeichnis:"
+  find "$APP_DIR" -maxdepth 3 -type f | sed "s#^$APP_DIR/##" | head -80 || true
+  fail "Keine VistaBoard-Startdatei gefunden. Erwartet wurde index.js oder dist/index.js."
+fi
+ok "Startdatei erkannt: $APP_START"
+
 # ── 5. Node-Abhaengigkeiten ─────────────────────────────────────────────────
 log "Installiere Node.js-Abhaengigkeiten..."
 cd "$APP_DIR"
 if [[ -f package.json ]]; then
-  npm install --production --legacy-peer-deps 2>/dev/null || npm install --production 2>/dev/null || true
+  npm install --omit=dev --legacy-peer-deps --no-audit --no-fund \
+  || npm install --omit=dev --no-audit --no-fund \
+  || fail "Node.js-Abhaengigkeiten konnten nicht installiert werden. Bitte Internetverbindung pruefen und erneut starten."
+
+  if [[ ! -d node_modules/dotenv ]]; then
+    npm install dotenv --omit=dev --no-audit --no-fund \
+    || fail "Pflichtpaket dotenv konnte nicht installiert werden."
+  fi
 fi
 ok "Abhaengigkeiten installiert"
 
@@ -194,9 +217,15 @@ VISTABOARD_KIOSK_USER=$KIOSK_USER
 VISTABOARD_KIOSK_HOME=$KIOSK_HOME
 VISTABOARD_DISPLAY_HELPER_PATH=$KIOSK_HOME/.local/bin/vistaboard-display-helper.js
 VISTABOARD_DISPLAY_OUTPUT=$HDMI_OUTPUT
+VISTABOARD_ENTRY=$APP_START
 EOF
 else
   log ".env existiert bereits, ueberspringe"
+  if ! grep -q '^VISTABOARD_ENTRY=' "$APP_DIR/.env"; then
+    printf '\nVISTABOARD_ENTRY=%s\n' "$APP_START" >> "$APP_DIR/.env"
+  else
+    sed -i "s#^VISTABOARD_ENTRY=.*#VISTABOARD_ENTRY=$APP_START#" "$APP_DIR/.env"
+  fi
 fi
 ok ".env konfiguriert"
 
@@ -249,7 +278,7 @@ Type=simple
 User=$APP_USER
 WorkingDirectory=$APP_DIR
 EnvironmentFile=$APP_DIR/.env
-ExecStart=/usr/bin/node $APP_DIR/index.js
+ExecStart=/usr/bin/node $APP_START
 Restart=always
 RestartSec=5
 
@@ -286,14 +315,33 @@ fi
 log "Konfiguriere Kiosk-Modus..."
 CHROMIUM_FLAGS="--password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars --disable-translate --disable-suggestions-ui --disable-features=TranslateUI,Translate --lang=de --ozone-platform=wayland"
 
+cat > /usr/local/bin/vistaboard-kiosk.sh <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+URL="http://127.0.0.1:$PORT/"
+for _ in \$(seq 1 120); do
+  if curl -fsS "\$URL" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+xset s off -dpms 2>/dev/null || true
+unclutter -idle 1 2>/dev/null &
+
+exec chromium $CHROMIUM_FLAGS "\$URL" \\
+  || exec chromium-browser --password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars "\$URL"
+EOF
+chmod +x /usr/local/bin/vistaboard-kiosk.sh
+
 if [[ -d "$KIOSK_HOME" ]]; then
   mkdir -p "$KIOSK_HOME/.config/labwc"
   cat > "$KIOSK_HOME/.config/labwc/autostart" <<EOF
 # VistaBoard Display Helper
 sleep 1 && VISTABOARD_DISPLAY_OUTPUT=$HDMI_OUTPUT /usr/bin/node $HELPER_DEST &
 
-# VistaBoard Kiosk (ohne Panel/Taskbar)
-sleep 5 && chromium $CHROMIUM_FLAGS http://localhost:$PORT/ &
+# VistaBoard Kiosk (wartet, bis der lokale Server erreichbar ist)
+/usr/local/bin/vistaboard-kiosk.sh &
 EOF
   chown -R "$KIOSK_USER:$KIOSK_USER" "$KIOSK_HOME/.config/labwc"
 fi
@@ -304,7 +352,7 @@ cat > /etc/xdg/autostart/vistaboard-kiosk.desktop <<EOF
 [Desktop Entry]
 Type=Application
 Name=VistaBoard Kiosk
-Exec=sh -c 'sleep 8; xset s off -dpms 2>/dev/null; unclutter -idle 1 2>/dev/null & chromium $CHROMIUM_FLAGS http://127.0.0.1:$PORT/ || chromium-browser --password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars http://127.0.0.1:$PORT/'
+Exec=/usr/local/bin/vistaboard-kiosk.sh
 Terminal=false
 EOF
 ok "Kiosk-Modus konfiguriert"
