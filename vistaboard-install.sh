@@ -5,7 +5,7 @@ APP_USER="${VISTABOARD_USER:-vistaboard}"
 APP_DIR="${VISTABOARD_APP_DIR:-/home/vistaboard/app}"
 PORT="${VISTABOARD_PORT:-3000}"
 PACKAGE_URL="${VISTABOARD_PACKAGE_URL:-https://www.vista-board.com/downloads/vistaboard-latest.tar.gz}"
-ZENTRALE_URL="${VISTABOARD_ZENTRALE:-https://update.vista-board.com/vistaboard}"
+ZENTRALE_URL="${VISTABOARD_ZENTRALE:-https://www.vista-board.com/vistaboard}"
 
 log() { printf '\n[VistaBoard] %s\n' "$*"; }
 ok()  { printf '[OK] %s\n' "$*"; }
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS dashboard_config (
   display_timeout INT NOT NULL DEFAULT 0,
   display_off_time_start VARCHAR(5) NOT NULL DEFAULT '22:00',
   display_off_time_end VARCHAR(5) NOT NULL DEFAULT '06:00',
-  display_orientation VARCHAR(32) NOT NULL DEFAULT 'landscape',
+  display_orientation VARCHAR(32) NOT NULL DEFAULT 'portrait',
   display_resolution VARCHAR(32) NOT NULL DEFAULT '1080p',
   display_custom_width INT,
   display_custom_height INT,
@@ -333,6 +333,51 @@ exec chromium $CHROMIUM_FLAGS "\$URL" \\
   || exec chromium-browser --password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars "\$URL"
 EOF
 chmod +x /usr/local/bin/vistaboard-kiosk.sh
+
+# Update-Script installieren (fuer OTA-Updates aus VistaBoard heraus)
+if [ -f "$APP_DIR/vistaboard-update.sh" ]; then
+  cp "$APP_DIR/vistaboard-update.sh" /usr/local/bin/vistaboard-update.sh
+else
+  # Inline-Fallback falls nicht im Paket enthalten
+  cat > /usr/local/bin/vistaboard-update.sh <<'UPDATESCRIPT'
+#!/bin/bash
+set -u
+SRC="${1:-}"
+APP=/home/vistaboard/app
+BAK="/home/vistaboard/app.bak"
+log(){ echo "[update] $*"; }
+fail(){ echo "[update] FAIL: $*" >&2; exit 1; }
+case "$SRC" in /tmp/vb-dist-new-*) ;; *) fail "Quelle muss /tmp/vb-dist-new-* sein (war: $SRC)" ;; esac
+[ -d "$SRC" ] || fail "Quelle $SRC existiert nicht"
+[ -f "$SRC/index.js" ] || fail "Quelle enthält kein index.js"
+log "Backup nach $BAK"
+rm -rf "$BAK"
+cp -al "$APP" "$BAK" 2>/dev/null || cp -r "$APP" "$BAK"
+log "Installiere neue Version..."
+rsync -a --delete --exclude='data/' --exclude='.env' --exclude='node_modules/' "$SRC/" "$APP/" || fail "rsync fehlgeschlagen"
+if [ -f "$APP/package.json" ]; then cd "$APP" && npm install --omit=dev --no-audit --no-fund 2>&1 || true; fi
+if [ -f "$SRC/display-helper.js" ]; then cp "$SRC/display-helper.js" /usr/local/bin/vistaboard-display-helper.js 2>/dev/null || true; fi
+if [ -f "$SRC/vistaboard-update.sh" ]; then cp "$SRC/vistaboard-update.sh" /usr/local/bin/vistaboard-update.sh; chmod +x /usr/local/bin/vistaboard-update.sh; fi
+chown -R vistaboard:vistaboard "$APP"
+log "Starte Service neu..."
+systemctl restart vistaboard
+log "Health-Check..."
+OK=0; for _ in $(seq 1 30); do if curl -sf -o /dev/null http://127.0.0.1:3000/ 2>/dev/null; then OK=1; break; fi; sleep 1; done
+if [ "$OK" = "1" ]; then log "Update erfolgreich"; rm -rf "$BAK"; exit 0; fi
+log "Health-Check fehlgeschlagen - Rollback..."
+rsync -a --delete "$BAK/" "$APP/"
+chown -R vistaboard:vistaboard "$APP"
+systemctl restart vistaboard
+fail "ROLLED_BACK"
+UPDATESCRIPT
+fi
+chmod +x /usr/local/bin/vistaboard-update.sh
+ok "Update-Script installiert"
+
+# Passwordless sudo fuer vistaboard-update.sh (OTA-Updates aus dem Service heraus)
+echo "vistaboard ALL=(ALL) NOPASSWD: /usr/local/bin/vistaboard-update.sh" > /etc/sudoers.d/vistaboard-update
+chmod 440 /etc/sudoers.d/vistaboard-update
+ok "Sudoers fuer Update-Script konfiguriert"
 
 if [[ -d "$KIOSK_HOME" ]]; then
   mkdir -p "$KIOSK_HOME/.config/labwc"
