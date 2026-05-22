@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://www.vista-board.com">
-    <img src="https://www.vista-board.com/website/assets/hero-board-front.png" alt="VistaBoard - Smart Wall Display for Raspberry Pi" width="480">
+    <img src="vistaboard-preview.png" alt="VistaBoard - Smart Wall Display for Raspberry Pi" width="480">
   </a>
 </p>
 
