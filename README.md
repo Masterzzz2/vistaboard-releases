@@ -27,6 +27,27 @@ VistaBoard is a turnkey smart display solution that transforms a Raspberry Pi (o
 
 **No coding. No config files. Just install and go.**
 
+## Easiest setup: ready-made Raspberry Pi image
+
+For beginners, the recommended installation is the ready-made VistaBoard Raspberry Pi image. You do not need to install Linux manually and you do not need terminal commands for the first start.
+
+1. Download the latest SD card image from [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest) or from [vista-board.com/installation](https://www.vista-board.com/installation).
+2. Install [Raspberry Pi Imager](https://www.raspberrypi.com/software/) on Windows, macOS or Linux.
+3. In Raspberry Pi Imager choose your Pi model, then **Choose OS > Use custom image**.
+4. Select `VistaBoard-RaspberryPi.img.xz`. Do not unzip the file.
+5. Choose your microSD card, enter Wi-Fi in the advanced settings if needed, and write the card.
+6. Insert the card into the Raspberry Pi, connect HDMI and power. The first boot can take a few minutes.
+7. Open `http://<PI-IP>:3000` from a phone, tablet or computer in the same network and follow the setup wizard.
+
+Printable beginner PDF in German and English: [VistaBoard image guide](https://vista-board.pages.dev/downloads/vistaboard-image-anleitung.pdf)
+
+### Quick decision: image or installer?
+
+| Option | Best for | What you do |
+|--------|----------|-------------|
+| **Ready-made image** | Beginners and new Raspberry Pi setups | Flash one `.img.xz` file to the SD card |
+| **Installer script** | Existing Raspberry Pi OS / Debian / Ubuntu systems | Run the install command in a terminal |
+
 ## Who is it for?
 
 | Use Case | What you get |
@@ -181,6 +202,27 @@ VistaBoard updates automatically. You can also trigger updates manually in **Set
 VistaBoard macht aus einem Raspberry Pi ein dauerhaft eingeschaltetes Wanddisplay fuer die ganze Familie. Es zeigt Kalender, Wetter, Fotos, Nachrichten — und optional PV-Daten, Hausakku, Wallbox und Strompreise.
 
 **Kein Programmieren. Keine Konfigurationsdateien. Einfach installieren und fertig.**
+
+## Einfachster Start: fertiges Raspberry-Pi-Image
+
+Fuer Anfaenger ist das fertige VistaBoard Raspberry-Pi-Image der einfachste Weg. Du musst Linux nicht manuell installieren und brauchst fuer den ersten Start keine Terminal-Befehle.
+
+1. Lade das aktuelle SD-Karten-Image aus den [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest) oder ueber [vista-board.com/installation](https://www.vista-board.com/installation).
+2. Installiere den [Raspberry Pi Imager](https://www.raspberrypi.com/software/) auf Windows, macOS oder Linux.
+3. Waehle im Raspberry Pi Imager dein Pi-Modell und danach **Betriebssystem waehlen > Eigenes Image verwenden**.
+4. Waehle `VistaBoard-RaspberryPi.img.xz` aus. Die Datei nicht entpacken.
+5. Waehle deine microSD-Karte, trage bei Bedarf WLAN in den erweiterten Einstellungen ein und schreibe die Karte.
+6. Stecke die Karte in den Raspberry Pi, schliesse HDMI und Strom an. Der erste Start kann ein paar Minuten dauern.
+7. Oeffne `http://<PI-IP>:3000` von Handy, Tablet oder Computer im gleichen Netzwerk und folge dem Einrichtungsassistenten.
+
+Druckbare Anfaenger-PDF auf Deutsch und Englisch: [VistaBoard Image Anleitung](https://vista-board.pages.dev/downloads/vistaboard-image-anleitung.pdf)
+
+### Schnellentscheidung: Image oder Installer?
+
+| Weg | Ideal fuer | Was du machst |
+|-----|------------|---------------|
+| **Fertiges Image** | Anfaenger und neue Raspberry-Pi-Setups | Eine `.img.xz`-Datei auf die SD-Karte schreiben |
+| **Installationsskript** | Vorhandene Raspberry Pi OS / Debian / Ubuntu Systeme | Installationsbefehl im Terminal ausfuehren |
 
 ## Fuer wen?
 
