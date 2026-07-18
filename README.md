@@ -27,27 +27,6 @@ VistaBoard is a turnkey smart display solution that transforms a Raspberry Pi (o
 
 **No coding. No config files. Just install and go.**
 
-## Easiest setup: ready-made Raspberry Pi image
-
-For beginners, the recommended installation is the ready-made VistaBoard Raspberry Pi image. You do not need to install Linux manually and you do not need terminal commands for the first start.
-
-1. Download the latest SD card image from [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest) or from [vista-board.com/installation](https://www.vista-board.com/installation).
-2. Install [Raspberry Pi Imager](https://www.raspberrypi.com/software/) on Windows, macOS or Linux.
-3. In Raspberry Pi Imager choose your Pi model, then **Choose OS > Use custom image**.
-4. Select `VistaBoard-RaspberryPi.img.xz`. Do not unzip the file.
-5. Choose your microSD card, enter Wi-Fi in the advanced settings if needed, and write the card.
-6. Insert the card into the Raspberry Pi, connect HDMI and power. The first boot can take a few minutes.
-7. Open `http://<PI-IP>:3000` from a phone, tablet or computer in the same network and follow the setup wizard.
-
-Printable beginner PDF in German and English: [VistaBoard image guide](https://vista-board.pages.dev/downloads/vistaboard-image-anleitung.pdf)
-
-### Quick decision: image or installer?
-
-| Option | Best for | What you do |
-|--------|----------|-------------|
-| **Ready-made image** | Beginners and new Raspberry Pi setups | Flash one `.img.xz` file to the SD card |
-| **Installer script** | Existing Raspberry Pi OS / Debian / Ubuntu systems | Run the install command in a terminal |
-
 ## Who is it for?
 
 | Use Case | What you get |
@@ -91,6 +70,24 @@ Printable beginner PDF in German and English: [VistaBoard image guide](https://v
 - Export/import settings between boards (license stays hardware-bound)
 
 ## Quick Install
+
+### Recommended: ready-made Pi 2B image
+
+For Raspberry Pi 2 Model B use the tested release asset:
+
+`VistaBoard-Pi2B-32bit-2.8.28-FINAL.img.xz`
+
+1. Install [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+2. Select the Raspberry Pi 2 model.
+3. Choose **Use custom image** and select the downloaded `.img.xz` file.
+4. Before writing, set country, language, time zone, username, password, Wi-Fi and optional SSH in Raspberry Pi Imager.
+5. Write the microSD card, insert it into the Pi and connect display, network and power.
+6. Complete the Raspberry Pi welcome wizard if it appears.
+7. VistaBoard installs itself automatically afterwards. On a Pi 2B this can take 15-30 minutes.
+
+Download: [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest)
+
+### Manual install
 
 Two commands — 5 minutes — done.
 
@@ -203,27 +200,6 @@ VistaBoard macht aus einem Raspberry Pi ein dauerhaft eingeschaltetes Wanddispla
 
 **Kein Programmieren. Keine Konfigurationsdateien. Einfach installieren und fertig.**
 
-## Einfachster Start: fertiges Raspberry-Pi-Image
-
-Fuer Anfaenger ist das fertige VistaBoard Raspberry-Pi-Image der einfachste Weg. Du musst Linux nicht manuell installieren und brauchst fuer den ersten Start keine Terminal-Befehle.
-
-1. Lade das aktuelle SD-Karten-Image aus den [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest) oder ueber [vista-board.com/installation](https://www.vista-board.com/installation).
-2. Installiere den [Raspberry Pi Imager](https://www.raspberrypi.com/software/) auf Windows, macOS oder Linux.
-3. Waehle im Raspberry Pi Imager dein Pi-Modell und danach **Betriebssystem waehlen > Eigenes Image verwenden**.
-4. Waehle `VistaBoard-RaspberryPi.img.xz` aus. Die Datei nicht entpacken.
-5. Waehle deine microSD-Karte, trage bei Bedarf WLAN in den erweiterten Einstellungen ein und schreibe die Karte.
-6. Stecke die Karte in den Raspberry Pi, schliesse HDMI und Strom an. Der erste Start kann ein paar Minuten dauern.
-7. Oeffne `http://<PI-IP>:3000` von Handy, Tablet oder Computer im gleichen Netzwerk und folge dem Einrichtungsassistenten.
-
-Druckbare Anfaenger-PDF auf Deutsch und Englisch: [VistaBoard Image Anleitung](https://vista-board.pages.dev/downloads/vistaboard-image-anleitung.pdf)
-
-### Schnellentscheidung: Image oder Installer?
-
-| Weg | Ideal fuer | Was du machst |
-|-----|------------|---------------|
-| **Fertiges Image** | Anfaenger und neue Raspberry-Pi-Setups | Eine `.img.xz`-Datei auf die SD-Karte schreiben |
-| **Installationsskript** | Vorhandene Raspberry Pi OS / Debian / Ubuntu Systeme | Installationsbefehl im Terminal ausfuehren |
-
 ## Fuer wen?
 
 - **Familien** — Gemeinsamer Kalender an der Kuechenwand
@@ -248,6 +224,24 @@ Druckbare Anfaenger-PDF auf Deutsch und Englisch: [VistaBoard Image Anleitung](h
 - Automatische Updates mit Rollback-Sicherheit
 
 ## Schnellinstallation
+
+### Empfohlen: fertiges Pi-2B-Image
+
+Fuer Raspberry Pi 2 Model B verwende das getestete Release-Asset:
+
+`VistaBoard-Pi2B-32bit-2.8.28-FINAL.img.xz`
+
+1. Installiere den [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+2. Waehle das Raspberry-Pi-2-Modell.
+3. Waehle **Eigenes Image verwenden** und dann die heruntergeladene `.img.xz`-Datei.
+4. Lege vor dem Schreiben Land, Sprache, Zeitzone, Benutzername, Passwort, WLAN und optional SSH im Raspberry Pi Imager fest.
+5. Schreibe die microSD-Karte, stecke sie in den Pi und schliesse Bildschirm, Netzwerk und Strom an.
+6. Falls der Raspberry-Pi-Willkommensassistent erscheint, fuehre ihn einmal zu Ende.
+7. VistaBoard installiert sich danach automatisch. Beim Pi 2B kann das 15-30 Minuten dauern.
+
+Download: [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest)
+
+### Manuelle Installation
 
 ```bash
 curl -fsSL https://www.vista-board.com/downloads/vistaboard-install.sh -o vistaboard-install.sh
