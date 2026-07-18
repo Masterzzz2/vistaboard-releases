@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 027
 
 APP_USER="${VISTABOARD_USER:-vistaboard}"
 APP_DIR="${VISTABOARD_APP_DIR:-/home/vistaboard/app}"
 PORT="${VISTABOARD_PORT:-3000}"
 PACKAGE_URL="${VISTABOARD_PACKAGE_URL:-https://www.vista-board.com/downloads/vistaboard-latest.tar.gz}"
+PACKAGE_SHA256="${VISTABOARD_PACKAGE_SHA256:-}"
+PACKAGE_MANIFEST_URL="${VISTABOARD_PACKAGE_MANIFEST_URL:-https://www.vista-board.com/downloads/vistaboard-latest.json}"
 ZENTRALE_URL="${VISTABOARD_ZENTRALE:-https://www.vista-board.com/vistaboard}"
+export DEBIAN_FRONTEND="${DEBIAN_FRONTEND:-noninteractive}"
 
 log() { printf '\n[VistaBoard] %s\n' "$*"; }
 ok()  { printf '[OK] %s\n' "$*"; }
@@ -19,18 +23,25 @@ if ! command -v apt-get >/dev/null 2>&1; then
   fail "Dieser Installer ist fuer Debian/Raspberry Pi OS/Ubuntu gedacht."
 fi
 
+[[ "$APP_USER" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || fail "Ungueltiger VistaBoard-Systembenutzer."
+[[ "$APP_DIR" == "/home/$APP_USER/app" ]] || fail "Ungueltiges VistaBoard-App-Verzeichnis."
+[[ "$PORT" =~ ^[0-9]+$ ]] && (( PORT >= 1024 && PORT <= 65535 )) || fail "Ungueltiger Netzwerk-Port."
+[[ "$PACKAGE_URL" == https://* || "$PACKAGE_URL" == file:///boot/firmware/vistaboard/* ]] || fail "Paket-URL muss HTTPS verwenden."
+[[ "$PACKAGE_MANIFEST_URL" == https://* ]] || fail "Manifest-URL muss HTTPS verwenden."
+[[ "$ZENTRALE_URL" == https://* ]] || fail "Update-Server muss HTTPS verwenden."
+
 # ── 1. Systempakete ──────────────────────────────────────────────────────────
 log "Installiere Systempakete..."
 apt-get update -qq
-apt-get install -y curl ca-certificates tar gzip nodejs npm \
-  mariadb-server \
-  fonts-liberation unclutter wlr-randr \
-  chromium 2>/dev/null \
-|| apt-get install -y curl ca-certificates tar gzip nodejs npm \
-  mariadb-server \
-  fonts-liberation unclutter wlr-randr \
-  chromium-browser 2>/dev/null \
-|| fail "Systempakete konnten nicht installiert werden."
+system_packages=(
+  curl ca-certificates tar gzip nodejs npm rsync
+  mariadb-server fonts-liberation unclutter wlr-randr
+)
+if ! apt-get install -y -o DPkg::Lock::Timeout=300 "${system_packages[@]}" chromium; then
+  log "Paketname chromium ist nicht verfuegbar, versuche chromium-browser..."
+  apt-get install -y -o DPkg::Lock::Timeout=300 "${system_packages[@]}" chromium-browser \
+    || fail "Systempakete konnten nicht installiert werden."
+fi
 ok "Systempakete installiert"
 
 # ── 2. MariaDB einrichten ────────────────────────────────────────────────────
@@ -38,8 +49,17 @@ log "Richte Datenbank ein..."
 systemctl enable mariadb
 systemctl start mariadb
 
+DB_PASSWORD=""
+if [[ -f "$APP_DIR/.env" ]]; then
+  DB_PASSWORD="$(sed -n 's#^DATABASE_URL=mysql://vistaboard:\([a-f0-9]\{48\}\)@localhost:3306/vistaboard$#\1#p' "$APP_DIR/.env" | head -n 1)"
+fi
+if [[ ! "$DB_PASSWORD" =~ ^[a-f0-9]{48}$ ]]; then
+  DB_PASSWORD="$(od -An -N24 -tx1 /dev/urandom | tr -d ' \n')"
+fi
+
 mysql -e "CREATE DATABASE IF NOT EXISTS vistaboard CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-mysql -e "CREATE USER IF NOT EXISTS 'vistaboard'@'localhost' IDENTIFIED BY 'vistaboard';"
+mysql -e "CREATE USER IF NOT EXISTS 'vistaboard'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+mysql -e "ALTER USER 'vistaboard'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
 mysql -e "GRANT ALL PRIVILEGES ON vistaboard.* TO 'vistaboard'@'localhost'; FLUSH PRIVILEGES;"
 
 mysql vistaboard <<'SCHEMA'
@@ -116,19 +136,65 @@ fi
 log "Lade VistaBoard herunter..."
 mkdir -p "$APP_DIR" "$APP_DIR/data"
 
+if [[ ! "$PACKAGE_SHA256" =~ ^[a-fA-F0-9]{64}$ ]]; then
+  manifest_file="$(mktemp /tmp/vistaboard-manifest.XXXXXX.json)"
+  curl -fL --proto '=https' --tlsv1.2 "$PACKAGE_MANIFEST_URL" -o "$manifest_file"
+  PACKAGE_SHA256="$(node -e '
+    const fs = require("fs");
+    const value = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).sha256 || "";
+    if (!/^[a-f0-9]{64}$/i.test(value)) process.exit(2);
+    process.stdout.write(value.toLowerCase());
+  ' "$manifest_file")" || fail "Das Download-Manifest enthaelt keine gueltige SHA-256-Pruefsumme."
+  rm -f "$manifest_file"
+fi
+PACKAGE_SHA256="${PACKAGE_SHA256,,}"
+
 # Lokales Paket oder Download
+package_is_temporary=0
 if [[ -f /boot/firmware/vistaboard/vistaboard-latest.tar.gz ]]; then
   tmp_pkg="/boot/firmware/vistaboard/vistaboard-latest.tar.gz"
   log "Nutze lokales Paket von SD-Karte"
 else
   tmp_pkg="$(mktemp /tmp/vistaboard-latest.XXXXXX.tar.gz)"
-  curl -fL "$PACKAGE_URL" -o "$tmp_pkg"
+  package_is_temporary=1
+  if [[ "$PACKAGE_URL" == https://* ]]; then
+    curl -fL --proto '=https' --tlsv1.2 "$PACKAGE_URL" -o "$tmp_pkg"
+  else
+    cp "${PACKAGE_URL#file://}" "$tmp_pkg"
+  fi
 fi
+
+actual_sha256="$(sha256sum "$tmp_pkg" | awk '{print $1}')"
+[[ "$actual_sha256" == "$PACKAGE_SHA256" ]] || fail "Paket-Pruefsumme stimmt nicht. Download oder Image wurde veraendert."
+package_size="$(stat -c %s "$tmp_pkg")"
+(( package_size >= 1024 && package_size <= 300 * 1024 * 1024 )) || fail "VistaBoard-Paket hat eine ungueltige Groesse."
+
+archive_names="$(mktemp /tmp/vistaboard-archive.XXXXXX.list)"
+archive_types="$(mktemp /tmp/vistaboard-archive.XXXXXX.types)"
+tar -tzf "$tmp_pkg" > "$archive_names" || fail "VistaBoard-Paket ist kein gueltiges tar.gz-Archiv."
+entry_count="$(wc -l < "$archive_names" | tr -d ' ')"
+(( entry_count > 0 && entry_count <= 10000 )) || fail "VistaBoard-Paket hat eine ungueltige Dateianzahl."
+while IFS= read -r archive_name; do
+  normalized="${archive_name#./}"
+  [[ -z "$normalized" ]] && continue
+  case "$normalized" in
+    /*|../*|*/../*|*/..|-*) fail "Unsicherer Pfad im VistaBoard-Paket: $archive_name" ;;
+  esac
+done < "$archive_names"
+tar -tvzf "$tmp_pkg" > "$archive_types" || fail "VistaBoard-Paket konnte nicht geprueft werden."
+while IFS= read -r archive_line; do
+  case "${archive_line:0:1}" in
+    -|d) ;;
+    *) fail "VistaBoard-Paket enthaelt unzulaessige Links oder Spezialdateien." ;;
+  esac
+done < "$archive_types"
+rm -f "$archive_names" "$archive_types"
 
 # Entpacken direkt ins App-Verzeichnis (nicht in dist/)
 rm -rf "$APP_DIR/app.new"
 mkdir -p "$APP_DIR/app.new"
 tar -xzf "$tmp_pkg" -C "$APP_DIR/app.new" 2>/dev/null || tar --no-xattrs -xzf "$tmp_pkg" -C "$APP_DIR/app.new"
+if (( package_is_temporary )); then rm -f "$tmp_pkg"; fi
 
 # Falls Tarball ein Unterverzeichnis enthält, Inhalt hochziehen
 if [[ ! -f "$APP_DIR/app.new/index.js" ]]; then
@@ -139,6 +205,23 @@ if [[ ! -f "$APP_DIR/app.new/index.js" ]]; then
     rmdir "$subdir" 2>/dev/null || true
   fi
 fi
+
+# Validate the complete runtime before replacing any existing installation.
+for required in index.js package.json package-lock.json VERSION public/index.html; do
+  [[ -f "$APP_DIR/app.new/$required" ]] || fail "VistaBoard-Paket ist unvollstaendig: $required fehlt."
+done
+new_index_size="$(stat -c %s "$APP_DIR/app.new/index.js" 2>/dev/null || echo 0)"
+(( new_index_size > 10000 )) || fail "VistaBoard-Paket enthaelt eine unvollstaendige index.js."
+/usr/bin/node --check "$APP_DIR/app.new/index.js" >/dev/null \
+  || fail "VistaBoard-Paket enthaelt ungueltiges Server-JavaScript."
+package_version="$(node -e '
+  const fs = require("fs");
+  const value = JSON.parse(fs.readFileSync(process.argv[1], "utf8")).version || "";
+  if (!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(value)) process.exit(2);
+  process.stdout.write(value);
+' "$APP_DIR/app.new/package.json")" || fail "VistaBoard-Paket enthaelt eine ungueltige Version."
+version_file="$(tr -d '[:space:]' < "$APP_DIR/app.new/VERSION")"
+[[ "$package_version" == "$version_file" ]] || fail "VistaBoard-Paket hat widerspruechliche Versionsangaben."
 
 # Backup data/ und .env, dann atomic swap
 [[ -d "$APP_DIR/data" ]] && cp -a "$APP_DIR/data" "$APP_DIR/app.new/data" 2>/dev/null || true
@@ -170,23 +253,26 @@ ok "Startdatei erkannt: $APP_START"
 # ── 5. Node-Abhaengigkeiten ─────────────────────────────────────────────────
 log "Installiere Node.js-Abhaengigkeiten..."
 cd "$APP_DIR"
-if [[ -f package.json ]]; then
-  npm install --omit=dev --legacy-peer-deps --no-audit --no-fund \
-  || npm install --omit=dev --no-audit --no-fund \
-  || fail "Node.js-Abhaengigkeiten konnten nicht installiert werden. Bitte Internetverbindung pruefen und erneut starten."
-
-  if [[ ! -d node_modules/dotenv ]]; then
-    npm install dotenv --omit=dev --no-audit --no-fund \
-    || fail "Pflichtpaket dotenv konnte nicht installiert werden."
-  fi
-fi
+chown -R "$APP_USER:$APP_USER" "$APP_DIR"
+[[ -f package-lock.json ]] || fail "Gesperrte Node.js-Abhaengigkeiten fehlen."
+runuser -u "$APP_USER" -- env NODE_OPTIONS=--max-old-space-size=384 \
+  npm ci --omit=dev --ignore-scripts --legacy-peer-deps --no-audit --no-fund \
+  || fail "Node.js-Abhaengigkeiten konnten nicht reproduzierbar installiert werden. Bitte Internetverbindung pruefen und erneut starten."
+[[ -d node_modules/dotenv ]] || fail "Pflichtpaket dotenv fehlt nach der Installation."
 ok "Abhaengigkeiten installiert"
 
 # ── 6. Kiosk-Benutzer erkennen ───────────────────────────────────────────────
-KIOSK_USER=""
-for candidate in pi vista; do
-  if id "$candidate" >/dev/null 2>&1; then KIOSK_USER="$candidate"; break; fi
-done
+# A customer image passes the user created by Raspberry Pi Imager explicitly.
+# This prevents a stale default account from becoming the kiosk account.
+KIOSK_USER="${VISTABOARD_KIOSK_USER:-}"
+if [[ -n "$KIOSK_USER" ]] && ! id "$KIOSK_USER" >/dev/null 2>&1; then
+  KIOSK_USER=""
+fi
+if [[ -z "$KIOSK_USER" ]]; then
+  for candidate in pi vista; do
+    if id "$candidate" >/dev/null 2>&1; then KIOSK_USER="$candidate"; break; fi
+  done
+fi
 if [[ -z "$KIOSK_USER" ]]; then
   for home in /home/*; do
     [[ -d "$home" ]] || continue
@@ -196,6 +282,9 @@ if [[ -z "$KIOSK_USER" ]]; then
   done
 fi
 KIOSK_USER="${KIOSK_USER:-pi}"
+if ! id "$KIOSK_USER" >/dev/null 2>&1; then
+  fail "Kein Raspberry-Pi-Benutzer gefunden. Bitte im Raspberry Pi Imager Benutzername und Passwort festlegen."
+fi
 KIOSK_HOME="/home/$KIOSK_USER"
 
 # ── 7. HDMI-Output erkennen ──────────────────────────────────────────────────
@@ -209,7 +298,7 @@ fi
 log "Erstelle Konfiguration..."
 if [[ ! -f "$APP_DIR/.env" ]]; then
   cat > "$APP_DIR/.env" <<EOF
-DATABASE_URL=mysql://vistaboard:vistaboard@localhost:3306/vistaboard
+DATABASE_URL=mysql://vistaboard:$DB_PASSWORD@localhost:3306/vistaboard
 NODE_ENV=production
 PORT=$PORT
 VB_UPDATE_SERVER=$ZENTRALE_URL
@@ -220,19 +309,46 @@ VISTABOARD_DISPLAY_OUTPUT=$HDMI_OUTPUT
 VISTABOARD_ENTRY=$APP_START
 EOF
 else
-  log ".env existiert bereits, ueberspringe"
-  if ! grep -q '^VISTABOARD_ENTRY=' "$APP_DIR/.env"; then
-    printf '\nVISTABOARD_ENTRY=%s\n' "$APP_START" >> "$APP_DIR/.env"
-  else
-    sed -i "s#^VISTABOARD_ENTRY=.*#VISTABOARD_ENTRY=$APP_START#" "$APP_DIR/.env"
-  fi
+  log "Aktualisiere vorhandene .env ohne Kundeneinstellungen zu loeschen"
+  set_env_value() {
+    local key="$1" value="$2" env_tmp
+    env_tmp="$(mktemp /tmp/vistaboard-env.XXXXXX)"
+    grep -v "^${key}=" "$APP_DIR/.env" > "$env_tmp" || true
+    printf '%s=%s\n' "$key" "$value" >> "$env_tmp"
+    mv "$env_tmp" "$APP_DIR/.env"
+  }
+  set_env_value DATABASE_URL "mysql://vistaboard:$DB_PASSWORD@localhost:3306/vistaboard"
+  set_env_value NODE_ENV production
+  set_env_value PORT "$PORT"
+  set_env_value VB_UPDATE_SERVER "$ZENTRALE_URL"
+  set_env_value VISTABOARD_KIOSK_USER "$KIOSK_USER"
+  set_env_value VISTABOARD_KIOSK_HOME "$KIOSK_HOME"
+  set_env_value VISTABOARD_DISPLAY_HELPER_PATH "$KIOSK_HOME/.local/bin/vistaboard-display-helper.js"
+  set_env_value VISTABOARD_DISPLAY_OUTPUT "$HDMI_OUTPUT"
+  set_env_value VISTABOARD_ENTRY "$APP_START"
 fi
+chmod 600 "$APP_DIR/.env"
+chown "$APP_USER:$APP_USER" "$APP_DIR/.env"
 ok ".env konfiguriert"
+
+# ── 8b. Desktop-Autologin fuer den vom Kunden gewaehlten Benutzer ───────────
+# The credentials remain the customer's own Raspberry Pi Imager credentials.
+if [[ -d /etc/lightdm/lightdm.conf.d || -f /etc/lightdm/lightdm.conf ]]; then
+  mkdir -p /etc/lightdm/lightdm.conf.d
+  cat > /etc/lightdm/lightdm.conf.d/99-vistaboard-autologin.conf <<EOF
+[Seat:*]
+autologin-user=$KIOSK_USER
+autologin-user-timeout=0
+user-session=rpd-labwc
+autologin-session=rpd-labwc
+EOF
+  ok "Desktop-Autologin fuer $KIOSK_USER konfiguriert"
+fi
 
 # ── 9. Display-Helper installieren ───────────────────────────────────────────
 log "Installiere Display-Helper..."
 HELPER_DEST="$KIOSK_HOME/.local/bin/vistaboard-display-helper.js"
-mkdir -p "$(dirname "$HELPER_DEST")"
+install -d -o "$KIOSK_USER" -g "$KIOSK_USER" -m 0755 "$(dirname "$HELPER_DEST")"
 
 if [[ -f /boot/firmware/vistaboard/vistaboard-display-helper.js ]]; then
   cp /boot/firmware/vistaboard/vistaboard-display-helper.js "$HELPER_DEST"
@@ -241,7 +357,7 @@ elif [[ -f "$APP_DIR/display-helper.js" ]]; then
 fi
 
 if [[ -f "$HELPER_DEST" ]]; then
-  chmod +x "$HELPER_DEST"
+  chmod 0755 "$HELPER_DEST"
   chown "$KIOSK_USER:$KIOSK_USER" "$HELPER_DEST"
   ok "Display-Helper installiert"
 else
@@ -276,11 +392,25 @@ Requires=mariadb.service
 [Service]
 Type=simple
 User=$APP_USER
+Group=$APP_USER
 WorkingDirectory=$APP_DIR
 EnvironmentFile=$APP_DIR/.env
 ExecStart=/usr/bin/node $APP_START
 Restart=always
 RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=$APP_DIR ${APP_DIR}.bak $KIOSK_HOME/.config/labwc
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 
 [Install]
 WantedBy=multi-user.target
@@ -313,78 +443,53 @@ fi
 
 # ── 14. Kiosk-Autostart (labwc/Wayland) ─────────────────────────────────────
 log "Konfiguriere Kiosk-Modus..."
-CHROMIUM_FLAGS="--password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars --disable-translate --disable-suggestions-ui --disable-features=TranslateUI,Translate --lang=de --ozone-platform=wayland"
+CHROMIUM_FLAGS="--password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars --disable-translate --disable-suggestions-ui --disable-features=TranslateUI,Translate --lang=de --ozone-platform=wayland --disable-gpu"
 
 cat > /usr/local/bin/vistaboard-kiosk.sh <<EOF
 #!/usr/bin/env bash
-set -euo pipefail
-URL="http://127.0.0.1:$PORT/"
-for _ in \$(seq 1 120); do
-  if curl -fsS "\$URL" >/dev/null 2>&1; then
-    break
-  fi
-  sleep 1
-done
-
-xset s off -dpms 2>/dev/null || true
-unclutter -idle 1 2>/dev/null &
-
-exec chromium $CHROMIUM_FLAGS "\$URL" \\
-  || exec chromium-browser --password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars "\$URL"
-EOF
-chmod +x /usr/local/bin/vistaboard-kiosk.sh
-
-# Update-Script installieren (fuer OTA-Updates aus VistaBoard heraus)
-if [ -f "$APP_DIR/vistaboard-update.sh" ]; then
-  cp "$APP_DIR/vistaboard-update.sh" /usr/local/bin/vistaboard-update.sh
-else
-  # Inline-Fallback falls nicht im Paket enthalten
-  cat > /usr/local/bin/vistaboard-update.sh <<'UPDATESCRIPT'
-#!/bin/bash
 set -u
-SRC="${1:-}"
-APP=/home/vistaboard/app
-BAK="/home/vistaboard/app.bak"
-log(){ echo "[update] $*"; }
-fail(){ echo "[update] FAIL: $*" >&2; exit 1; }
-case "$SRC" in /tmp/vb-dist-new-*) ;; *) fail "Quelle muss /tmp/vb-dist-new-* sein (war: $SRC)" ;; esac
-[ -d "$SRC" ] || fail "Quelle $SRC existiert nicht"
-[ -f "$SRC/index.js" ] || fail "Quelle enthält kein index.js"
-log "Backup nach $BAK"
-rm -rf "$BAK"
-cp -al "$APP" "$BAK" 2>/dev/null || cp -r "$APP" "$BAK"
-log "Installiere neue Version..."
-rsync -a --delete --exclude='data/' --exclude='.env' --exclude='node_modules/' "$SRC/" "$APP/" || fail "rsync fehlgeschlagen"
-if [ -f "$APP/package.json" ]; then cd "$APP" && npm install --omit=dev --no-audit --no-fund 2>&1 || true; fi
-if [ -f "$SRC/display-helper.js" ]; then cp "$SRC/display-helper.js" /usr/local/bin/vistaboard-display-helper.js 2>/dev/null || true; fi
-if [ -f "$SRC/vistaboard-update.sh" ]; then cp "$SRC/vistaboard-update.sh" /usr/local/bin/vistaboard-update.sh; chmod +x /usr/local/bin/vistaboard-update.sh; fi
-chown -R vistaboard:vistaboard "$APP"
-log "Starte Service neu..."
-systemctl restart vistaboard
-log "Health-Check..."
-OK=0; for _ in $(seq 1 30); do if curl -sf -o /dev/null http://127.0.0.1:3000/ 2>/dev/null; then OK=1; break; fi; sleep 1; done
-if [ "$OK" = "1" ]; then log "Update erfolgreich"; rm -rf "$BAK"; exit 0; fi
-log "Health-Check fehlgeschlagen - Rollback..."
-rsync -a --delete "$BAK/" "$APP/"
-chown -R vistaboard:vistaboard "$APP"
-systemctl restart vistaboard
-fail "ROLLED_BACK"
-UPDATESCRIPT
-fi
-chmod +x /usr/local/bin/vistaboard-update.sh
-ok "Update-Script installiert"
+URL="http://127.0.0.1:$PORT/"
+LOG="\${HOME:-/tmp}/.vistaboard-kiosk.log"
+LOCK_DIR="\${XDG_RUNTIME_DIR:-/tmp}/vistaboard-kiosk.lock"
 
-# Passwordless sudo fuer vistaboard-update.sh (OTA-Updates aus dem Service heraus)
-echo "vistaboard ALL=(ALL) NOPASSWD: /usr/local/bin/vistaboard-update.sh" > /etc/sudoers.d/vistaboard-update
-chmod 440 /etc/sudoers.d/vistaboard-update
-ok "Sudoers fuer Update-Script konfiguriert"
+if ! mkdir "\$LOCK_DIR" 2>/dev/null; then
+  exit 0
+fi
+trap 'rmdir "\$LOCK_DIR" 2>/dev/null || true' EXIT
+
+{
+  echo "[\$(date -Is)] VistaBoard kiosk waiting for \$URL"
+  until curl -fsS "\$URL" >/dev/null 2>&1; do
+    sleep 2
+  done
+  echo "[\$(date -Is)] VistaBoard server reachable, starting Chromium"
+} >>"\$LOG" 2>&1
+
+xset s off -dpms >>"\$LOG" 2>&1 || true
+if ! pgrep -x unclutter >/dev/null 2>&1; then
+  unclutter -idle 1 >>"\$LOG" 2>&1 &
+fi
+
+while true; do
+  chromium $CHROMIUM_FLAGS "\$URL" >>"\$LOG" 2>&1 \\
+    || chromium-browser --password-store=basic --kiosk --start-fullscreen --no-first-run --noerrdialogs --disable-infobars "\$URL" >>"\$LOG" 2>&1 \\
+    || true
+  echo "[\$(date -Is)] Chromium exited; restarting kiosk in 2s" >>"\$LOG" 2>&1
+  sleep 2
+done
+EOF
+chmod 0755 /usr/local/bin/vistaboard-kiosk.sh
+
+# Das Hilfsprogramm laeuft absichtlich als unprivilegierter App-Benutzer.
+# So kann ein Fehler in der Web-App niemals ueber den Updater zu root werden.
+[[ -f "$APP_DIR/vistaboard-update.sh" ]] || fail "Sicheres Update-Script fehlt im VistaBoard-Paket."
+install -o root -g root -m 0755 "$APP_DIR/vistaboard-update.sh" /usr/local/bin/vistaboard-update.sh
+rm -f /etc/sudoers.d/vistaboard-update
+ok "Unprivilegiertes Update-Script installiert"
 
 if [[ -d "$KIOSK_HOME" ]]; then
   mkdir -p "$KIOSK_HOME/.config/labwc"
   cat > "$KIOSK_HOME/.config/labwc/autostart" <<EOF
-# VistaBoard Display Helper
-sleep 1 && VISTABOARD_DISPLAY_OUTPUT=$HDMI_OUTPUT /usr/bin/node $HELPER_DEST &
-
 # VistaBoard Kiosk (wartet, bis der lokale Server erreichbar ist)
 /usr/local/bin/vistaboard-kiosk.sh &
 EOF
