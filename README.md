@@ -192,7 +192,8 @@ hostname -I                         # Find Pi IP address
 - Latest release: <https://github.com/Masterzzz2/vistaboard-releases/releases/latest>
 - Tester page: <https://www.vista-board.com/tester/en/>
 - DAKboard alternative: <https://www.vista-board.com/dakboard-alternative/en/>
-- Tesla battery state on a wall display: <https://www.vista-board.com/blog/tesla-ladestand-auf-wanddisplay-anzeigen/en/>
+- Tesla / EV charging wall display: <https://www.vista-board.com/tesla-battery-wall-display/>
+- Tesla battery state article: <https://www.vista-board.com/blog/tesla-ladestand-auf-wanddisplay-anzeigen/en/>
 - Support: support@vista-board.com
 
 ---
@@ -291,6 +292,7 @@ Ja. Vista-Board kann bei eingerichteter Tesla-Verbindung Ladestand, Reichweite u
 - Aktuelles Release: <https://github.com/Masterzzz2/vistaboard-releases/releases/latest>
 - Tester-Seite: <https://www.vista-board.com/tester/>
 - DAKboard-Alternative: <https://www.vista-board.com/dakboard-alternative/>
+- Tesla-/EV-Ladedisplay: <https://www.vista-board.com/tesla-battery-wall-display/>
 - Tesla-Ladestand auf dem Wanddisplay: <https://www.vista-board.com/blog/tesla-ladestand-auf-wanddisplay-anzeigen/>
 - Support: support@vista-board.com
 
