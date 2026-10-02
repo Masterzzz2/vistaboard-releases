@@ -8,7 +8,7 @@
 
 <p align="center">
   <strong>Raspberry Pi calendar display and smart wall dashboard for families, smart homes and solar households.</strong><br>
-  Apple iCloud, Google Calendar, weather, photos, PV energy, wallbox status and Tibber prices — on one always-visible screen.
+  Apple iCloud, Google Calendar, weather, photos, PV energy, Tesla battery state, wallbox status and Tibber prices — on one always-visible screen.
 </p>
 
 <p align="center">
@@ -37,7 +37,7 @@ Typical use cases:
 - a **family calendar display** in the kitchen or hallway,
 - a **Raspberry Pi wall calendar** for Apple iCloud and Google Calendar,
 - a **smart home dashboard** with weather, photos, news and reminders,
-- a **PV / solar dashboard** for Fronius, home battery, wallbox and Tibber electricity prices,
+- a **PV / solar dashboard** for Fronius, home battery, Tesla battery state, wallbox and Tibber electricity prices,
 - a small **office, waiting-room or lobby information display**.
 
 **No coding. No YAML. No cloud display account required for the dashboard itself.**
@@ -66,7 +66,7 @@ If you are unsure, start with the installation page: <https://www.vista-board.co
 | Family appointments are hidden on phones | shared Apple iCloud, Google, Outlook, Nextcloud and iCal calendars |
 | A paper calendar is always outdated | live calendar changes on a large wall display |
 | Smart-home information is split across apps | weather, photos, news, reminders and widgets in one place |
-| Solar and energy data are hidden in vendor apps | Fronius PV, home battery, grid import/export, wallbox and Tibber prices |
+| Solar, Tesla and energy data are hidden in vendor apps | Fronius PV, home battery, grid import/export, Tesla battery state, wallbox and Tibber prices |
 | MagicMirror is too technical for everyday use | a guided wall display product instead of a module/config project |
 
 ## Easiest setup: ready-made Raspberry Pi image
@@ -105,6 +105,7 @@ Printable beginner PDF in German and English: [Vista-Board image guide](https://
 - Fronius PV inverter: real-time solar production, battery, grid import/export
 - Home battery charge status and power flow
 - Wallbox / EV charging status
+- Tesla battery state, estimated range and charging status when connected
 - Tibber dynamic electricity prices
 - EPEX spot prices with custom surcharges
 - Fixed or flexible electricity tariffs
@@ -166,6 +167,10 @@ No proprietary Vista-Board cloud account is required for the local dashboard dis
 
 Yes. Vista-Board is especially useful if you want a guided Raspberry Pi wall display for calendars, photos, weather and energy data without maintaining a custom dashboard project.
 
+### Can Vista-Board show Tesla data?
+
+Yes. Vista-Board can show Tesla battery state, estimated range and charging status when Tesla is connected in the settings. This is useful together with PV, wallbox and electricity prices because the car becomes part of the visible home-energy overview.
+
 ### Where do I get support?
 
 Use the website support page or email support@vista-board.com. If you are testing the software, the tester page explains what feedback is most helpful.
@@ -187,6 +192,7 @@ hostname -I                         # Find Pi IP address
 - Latest release: <https://github.com/Masterzzz2/vistaboard-releases/releases/latest>
 - Tester page: <https://www.vista-board.com/tester/en/>
 - DAKboard alternative: <https://www.vista-board.com/dakboard-alternative/en/>
+- Tesla battery state on a wall display: <https://www.vista-board.com/blog/tesla-ladestand-auf-wanddisplay-anzeigen/en/>
 - Support: support@vista-board.com
 
 ---
@@ -195,7 +201,7 @@ hostname -I                         # Find Pi IP address
 
 <p align="center">
   <strong>Raspberry-Pi-Kalender und smartes Wanddisplay fuer Familie, Smart Home und PV-Haushalte.</strong><br>
-  Apple iCloud, Google Kalender, Wetter, Fotos, PV-Energie, Wallbox und Tibber-Strompreise — ein Bildschirm fuer alles.
+  Apple iCloud, Google Kalender, Wetter, Fotos, PV-Energie, Tesla-Ladestand, Wallbox und Tibber-Strompreise — ein Bildschirm fuer alles.
 </p>
 
 <p align="center">
@@ -206,14 +212,14 @@ hostname -I                         # Find Pi IP address
 
 ## Was ist Vista-Board?
 
-Vista-Board macht aus einem Raspberry Pi oder Linux-Mini-PC ein dauerhaft sichtbares Wanddisplay. Es zeigt Familienkalender, Wetter, Fotos, Nachrichten und optional PV-Daten, Hausakku, Wallbox und Strompreise.
+Vista-Board macht aus einem Raspberry Pi oder Linux-Mini-PC ein dauerhaft sichtbares Wanddisplay. Es zeigt Familienkalender, Wetter, Fotos, Nachrichten und optional PV-Daten, Hausakku, Tesla-Ladestand, Wallbox und Strompreise.
 
 Typische Einsaetze:
 
 - **digitaler Familienkalender** in Kueche oder Flur,
 - **Raspberry-Pi-Wandkalender** fuer Apple iCloud und Google Kalender,
 - **Smart-Home-Dashboard** mit Wetter, Fotos, Nachrichten und Erinnerungen,
-- **PV-/Solar-Dashboard** fuer Fronius, Hausakku, Wallbox und Tibber,
+- **PV-/Solar-Dashboard** fuer Fronius, Hausakku, Tesla-Ladestand, Wallbox und Tibber,
 - **Info-Display** fuer Buero, Wartezimmer, Lobby oder Ferienwohnung.
 
 **Kein Programmieren. Keine YAML-Dateien. Kein Cloud-Display-Konto fuer die Anzeige selbst.**
@@ -244,6 +250,7 @@ Wenn du unsicher bist, starte hier: <https://www.vista-board.com/installation>
 - RSS/Nachrichten, Zitate, Erinnerungen, Countdowns und eigene Widgets
 - Fronius-PV-Daten, Hausakku, Netzbezug/Einspeisung
 - Wallbox-/Ladestatus
+- Tesla-Ladestand, Reichweite und Ladezustand bei eingerichteter Tesla-Verbindung
 - Tibber-Strompreise, EPEX Spot, feste oder flexible Tarife
 - Hoch- und Querformat, dunkles/Pastell-/freies Layout
 - Deutsch und Englisch
@@ -271,6 +278,12 @@ Ausfuehrliche Anleitung: <https://www.vista-board.com/installation>
 
 Aktivierung direkt in Vista-Board per PayPal. Eine Lizenz pro Geraet.
 
+## Haeufige Fragen
+
+### Kann Vista-Board Tesla-Daten anzeigen?
+
+Ja. Vista-Board kann bei eingerichteter Tesla-Verbindung Ladestand, Reichweite und Ladezustand anzeigen. Besonders sinnvoll ist das zusammen mit PV, Wallbox und Strompreisen, weil das Auto dann Teil der sichtbaren Energieuebersicht im Haus wird.
+
 ## Links
 
 - Webseite: <https://www.vista-board.com>
@@ -278,6 +291,7 @@ Aktivierung direkt in Vista-Board per PayPal. Eine Lizenz pro Geraet.
 - Aktuelles Release: <https://github.com/Masterzzz2/vistaboard-releases/releases/latest>
 - Tester-Seite: <https://www.vista-board.com/tester/>
 - DAKboard-Alternative: <https://www.vista-board.com/dakboard-alternative/>
+- Tesla-Ladestand auf dem Wanddisplay: <https://www.vista-board.com/blog/tesla-ladestand-auf-wanddisplay-anzeigen/>
 - Support: support@vista-board.com
 
 ---
