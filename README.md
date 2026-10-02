@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://www.vista-board.com">
-    <img src="vistaboard-preview.png" alt="Vista-Board smart Raspberry Pi wall calendar display" width="520">
+    <img src="vistaboard-preview.png" alt="Vista-Board Raspberry Pi wall display for calendars, energy and smart home" width="820">
   </a>
 </p>
 
