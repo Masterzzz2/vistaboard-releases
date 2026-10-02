@@ -1,95 +1,124 @@
 <p align="center">
   <a href="https://www.vista-board.com">
-    <img src="vistaboard-preview.png" alt="VistaBoard - Smart Wall Display for Raspberry Pi" width="480">
+    <img src="vistaboard-preview.png" alt="Vista-Board smart Raspberry Pi wall calendar display" width="520">
   </a>
 </p>
 
-<h1 align="center">VistaBoard</h1>
+<h1 align="center">Vista-Board</h1>
 
 <p align="center">
-  <strong>Turn any Raspberry Pi into a beautiful smart wall display.</strong><br>
-  Calendar, weather, photos, solar energy, Tibber prices — one screen, zero hassle.
+  <strong>Raspberry Pi calendar display and smart wall dashboard for families, smart homes and solar households.</strong><br>
+  Apple iCloud, Google Calendar, weather, photos, PV energy, wallbox status and Tibber prices — on one always-visible screen.
 </p>
 
 <p align="center">
-  <a href="https://github.com/Masterzzz2/vistaboard-releases/releases/latest"><img src="https://img.shields.io/github/v/release/Masterzzz2/vistaboard-releases?label=latest&color=success" alt="Latest Release"></a>
-  <a href="https://www.vista-board.com"><img src="https://img.shields.io/badge/website-vista--board.com-blue" alt="Website"></a>
-  <a href="https://www.vista-board.com/installation"><img src="https://img.shields.io/badge/install-5%20minutes-brightgreen" alt="Install in 5 min"></a>
+  <a href="https://github.com/Masterzzz2/vistaboard-releases/releases/latest"><img src="https://img.shields.io/github/v/release/Masterzzz2/vistaboard-releases?label=latest%20download&color=success" alt="Latest download"></a>
+  <a href="https://www.vista-board.com/raspberry-pi-calendar-display/"><img src="https://img.shields.io/badge/Raspberry%20Pi-calendar%20display-7c3aed" alt="Raspberry Pi calendar display"></a>
+  <a href="https://www.vista-board.com/installation"><img src="https://img.shields.io/badge/setup-guided-brightgreen" alt="Guided setup"></a>
+  <a href="https://www.vista-board.com/tester/en/"><img src="https://img.shields.io/badge/tester-30%20day%20trial-orange" alt="Become a tester"></a>
   <img src="https://img.shields.io/badge/platform-Raspberry%20Pi%202B%20%7C%203%20%7C%204%20%7C%205-red" alt="Platform">
-  <img src="https://img.shields.io/badge/license-30%20day%20free%20trial-orange" alt="Trial">
+</p>
+
+<p align="center">
+  <a href="https://www.vista-board.com/installation"><strong>Installation guide</strong></a> ·
+  <a href="https://github.com/Masterzzz2/vistaboard-releases/releases/latest"><strong>Latest release</strong></a> ·
+  <a href="https://www.vista-board.com/raspberry-pi-calendar-display/"><strong>Raspberry Pi calendar display</strong></a> ·
+  <a href="https://www.vista-board.com/tester/en/"><strong>Become a tester</strong></a>
 </p>
 
 ---
 
-## What is VistaBoard?
+## What is Vista-Board?
 
-VistaBoard is a turnkey smart display solution that transforms a Raspberry Pi (or any Linux mini-PC) into an always-on wall display. It shows your family calendar, weather, photos, news — and optionally solar PV data, battery status, wallbox charging and electricity prices.
+Vista-Board turns a Raspberry Pi or Linux mini PC into a permanent wall display for your home, office or solar setup. It is made for people who want a useful dashboard on the wall without building a custom MagicMirror or maintaining config files.
 
-**No coding. No config files. Just install and go.**
+Typical use cases:
 
-## Who is it for?
+- a **family calendar display** in the kitchen or hallway,
+- a **Raspberry Pi wall calendar** for Apple iCloud and Google Calendar,
+- a **smart home dashboard** with weather, photos, news and reminders,
+- a **PV / solar dashboard** for Fronius, home battery, wallbox and Tibber electricity prices,
+- a small **office, waiting-room or lobby information display**.
 
-| Use Case | What you get |
-|----------|-------------|
-| **Families** | Shared calendar on the kitchen wall — everyone sees what's coming up |
-| **Smart Home** | One dashboard for weather, energy, news — always visible, always on |
-| **Solar / PV Owners** | Fronius inverter data, battery charge, grid import/export in real-time |
-| **EV Owners** | Wallbox charging status, Tibber electricity prices at a glance |
-| **Offices & Waiting Rooms** | Professional info display with news, weather and custom widgets |
-| **Digital Photo Frame** | Rotating photos from Bing, Unsplash, iCloud or local folders |
+**No coding. No YAML. No cloud display account required for the dashboard itself.**
+
+## Download: choose the right start
+
+| If you want... | Use this | Link |
+| --- | --- | --- |
+| The easiest first setup | Ready-made Raspberry Pi SD card image | [SD image release](https://github.com/Masterzzz2/vistaboard-releases/releases/tag/sd-image) or [installation page](https://www.vista-board.com/installation) |
+| Existing Raspberry Pi OS / Debian / Ubuntu | Installer script | [Installation guide](https://www.vista-board.com/installation) |
+| To understand the product first | Website and screenshots | [vista-board.com](https://www.vista-board.com) |
+| Help testing and feedback | Tester flow | [Become a tester](https://www.vista-board.com/tester/en/) |
+
+### Which image should I download?
+
+- **Raspberry Pi 3 / 4 / 5:** use `VistaBoard-RaspberryPi-64bit.img.xz` from the [SD image release](https://github.com/Masterzzz2/vistaboard-releases/releases/tag/sd-image).
+- **Raspberry Pi 2B:** use `VistaBoard-RaspberryPi-Pi2B-32bit.img.xz` from the [SD image release](https://github.com/Masterzzz2/vistaboard-releases/releases/tag/sd-image).
+- **Mini PC / existing Linux:** use the installer script instead of an SD card image.
+
+If you are unsure, start with the installation page: <https://www.vista-board.com/installation>
+
+## Why people use it
+
+| Problem | Vista-Board solves it by showing... |
+| --- | --- |
+| Family appointments are hidden on phones | shared Apple iCloud, Google, Outlook, Nextcloud and iCal calendars |
+| A paper calendar is always outdated | live calendar changes on a large wall display |
+| Smart-home information is split across apps | weather, photos, news, reminders and widgets in one place |
+| Solar and energy data are hidden in vendor apps | Fronius PV, home battery, grid import/export, wallbox and Tibber prices |
+| MagicMirror is too technical for everyday use | a guided wall display product instead of a module/config project |
+
+## Easiest setup: ready-made Raspberry Pi image
+
+For beginners, the recommended installation is the ready-made Vista-Board Raspberry Pi image. You do not need to install Linux manually and you do not need terminal commands for the first start.
+
+1. Download the SD card image from the [SD image release](https://github.com/Masterzzz2/vistaboard-releases/releases/tag/sd-image) or start from [vista-board.com/installation](https://www.vista-board.com/installation).
+2. Install [Raspberry Pi Imager](https://www.raspberrypi.com/software/) on Windows, macOS or Linux.
+3. In Raspberry Pi Imager choose your Pi model, then **Choose OS > Use custom image**.
+4. Select the downloaded `.img.xz` file. Do not unzip it.
+5. Choose your microSD card, enter Wi-Fi in the advanced settings if needed, and write the card.
+6. Insert the card into the Raspberry Pi, connect HDMI and power. The first boot can take a few minutes.
+7. Open `http://<PI-IP>:3000` from a phone, tablet or computer in the same network and follow the setup wizard.
+
+Printable beginner PDF in German and English: [Vista-Board image guide](https://www.vista-board.com/downloads/vistaboard-image-anleitung.pdf)
+
+### Quick decision: image or installer?
+
+| Option | Best for | What you do |
+|--------|----------|-------------|
+| **Ready-made image** | Beginners and new Raspberry Pi setups | Flash one `.img.xz` file to the SD card |
+| **Installer script** | Existing Raspberry Pi OS / Debian / Ubuntu systems | Run the install command in a terminal |
 
 ## Features
 
-### Display & Interface
-- Portrait and landscape mode for wall-mounted displays
-- Dark, pastel and fully customizable free-position layouts
-- Auto display on/off scheduling (e.g. screen off at night)
-- Automatic display rotation guard (survives monitor reconnect)
-- Full browser-based settings — configure from any device
+### Calendar and everyday information
 
-### Calendar & Information
-- Apple iCloud, Google Calendar, CalDAV and any iCal URL
-- Up to 6 calendars with individual colors
+- Apple iCloud, Google Calendar, Outlook, Nextcloud, CalDAV and any iCal/ICS URL
+- Multiple calendars with individual colors
 - Weather forecast with sunrise, sunset, alerts and detailed conditions
-- RSS news ticker and custom information widgets
-- Quotes of the day
+- Photos from Bing, Unsplash, iCloud/shared folders or local folders
+- RSS/news ticker, quotes, reminders, countdowns and custom widgets
 
-### Energy & Smart Home
-- Fronius PV inverter: real-time solar production, battery, grid
+### Energy and smart home
+
+- Fronius PV inverter: real-time solar production, battery, grid import/export
 - Home battery charge status and power flow
 - Wallbox / EV charging status
 - Tibber dynamic electricity prices
 - EPEX spot prices with custom surcharges
 - Fixed or flexible electricity tariffs
 
-### System
-- Full i18n: German and English
-- 30-day free trial — no credit card needed
+### Display and system
+
+- Portrait and landscape mode for wall-mounted monitors
+- Dark, pastel and free-position layouts
+- Browser-based settings from phone, tablet or computer
+- German and English interface
 - Automatic OTA updates with rollback safety
-- Auto-reboot after updates, browser cache auto-clear
-- Export/import settings between boards (license stays hardware-bound)
+- 30-day trial, then monthly or annual licence
 
-## Quick Install
-
-### Recommended: ready-made Pi 2B image
-
-For Raspberry Pi 2 Model B use the tested release asset:
-
-`VistaBoard-Pi2B-32bit-2.8.28-FINAL.img.xz`
-
-1. Install [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
-2. Select the Raspberry Pi 2 model.
-3. Choose **Use custom image** and select the downloaded `.img.xz` file.
-4. Before writing, set country, language, time zone, username, password, Wi-Fi and optional SSH in Raspberry Pi Imager.
-5. Write the microSD card, insert it into the Pi and connect display, network and power.
-6. Complete the Raspberry Pi welcome wizard if it appears.
-7. VistaBoard installs itself automatically afterwards. On a Pi 2B this can take 15-30 minutes.
-
-Download: [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest)
-
-### Manual install
-
-Two commands — 5 minutes — done.
+## Quick install on existing Raspberry Pi OS / Debian / Ubuntu
 
 ```bash
 curl -fsSL https://www.vista-board.com/downloads/vistaboard-install.sh -o vistaboard-install.sh
@@ -98,171 +127,161 @@ sudo bash vistaboard-install.sh
 
 Then open `http://<PI-IP>:3000` in any browser and follow the setup wizard.
 
-**Full step-by-step guide:** [www.vista-board.com/installation](https://www.vista-board.com/installation)
+Full guide: <https://www.vista-board.com/installation>
 
-## Hardware Requirements
+## Hardware requirements
 
 | Component | Requirement |
 |-----------|-------------|
-| **Board** | Raspberry Pi 5 *(recommended)*, Pi 4, Pi 3 or Pi 2B |
+| **Board** | Raspberry Pi 5 recommended; Pi 4, Pi 3 and Pi 2B supported depending on image/install path |
 | **RAM** | 2 GB minimum, 4 GB recommended |
-| **Storage** | MicroSD 16 GB+ (32 GB recommended) |
-| **Display** | Any HDMI monitor, TV or touchscreen |
-| **Network** | WiFi or Ethernet |
-| **OS** | Raspberry Pi OS (64-bit) Desktop |
+| **Storage** | microSD 16 GB+; 32 GB or SSD recommended |
+| **Display** | HDMI monitor, TV or touchscreen; 24–27 inch portrait display works well |
+| **Network** | Wi-Fi or Ethernet |
+| **OS** | Raspberry Pi OS, Debian or Ubuntu for installer-based setup |
 
-Also works on Linux mini-PCs, old laptops, or any Debian-based system with a browser.
-
-## Step-by-Step Installation
-
-### 1. Prepare the SD Card
-
-1. Download [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
-2. Select: **Raspberry Pi OS (64-bit) Desktop**
-3. Click the gear icon — set WiFi, username, enable SSH
-4. Write to SD card
-
-### 2. Boot & Install
-
-```bash
-# SSH into your Pi (or open terminal on the Pi directly)
-ssh pi@<PI-IP>
-
-# Download and run installer
-curl -fsSL https://www.vista-board.com/downloads/vistaboard-install.sh -o vistaboard-install.sh
-sudo bash vistaboard-install.sh
-
-# Reboot to start kiosk mode
-sudo reboot
-```
-
-### 3. Configure
-
-Open `http://<PI-IP>:3000` on any device and follow the wizard:
-1. Language (DE / EN)
-2. Activation (30-day free trial)
-3. Calendar (paste your iCal URL)
-4. Weather location
-5. Done!
+Also works on Linux mini PCs, old laptops or other Debian-based systems with a browser.
 
 ## Pricing
 
-| Plan | Price | |
-|------|-------|-|
-| **Free Trial** | 30 days, all features | No credit card needed |
+| Plan | Price | Notes |
+|------|-------|-------|
+| **Trial** | 30 days | All features, no payment details for the trial |
 | **Monthly** | 2.99 EUR/month | Cancel anytime |
-| **Yearly** | 29.49 EUR/year | Save 18% |
+| **Yearly** | 29.49 EUR/year | Lower yearly cost |
 
-Activate directly in VistaBoard settings via PayPal. One license per device.
+Activate directly in Vista-Board settings via PayPal. One licence per device.
 
-## Useful Commands
+## FAQ
+
+### Is Vista-Board open source?
+
+This repository is used for public releases, downloads and installation assets. The product itself is distributed as Vista-Board software with a 30-day trial and paid licence after the trial.
+
+### Does the dashboard require a cloud account?
+
+No proprietary Vista-Board cloud account is required for the local dashboard display. The software runs on your Raspberry Pi or Linux mini PC. External services such as Google Calendar, iCloud, weather data, Fronius or Tibber are only used when you configure those features.
+
+### Can I use it as a DAKboard or MagicMirror alternative?
+
+Yes. Vista-Board is especially useful if you want a guided Raspberry Pi wall display for calendars, photos, weather and energy data without maintaining a custom dashboard project.
+
+### Where do I get support?
+
+Use the website support page or email support@vista-board.com. If you are testing the software, the tester page explains what feedback is most helpful.
+
+## Useful commands
 
 ```bash
-sudo systemctl status vistaboard    # Check status
+sudo systemctl status vistaboard    # Check service status
 sudo journalctl -u vistaboard -n 50 # View logs
-sudo systemctl restart vistaboard   # Restart
-hostname -I                          # Find Pi IP address
+sudo systemctl restart vistaboard   # Restart service
+hostname -I                         # Find Pi IP address
 ```
-
-## Updates
-
-VistaBoard updates automatically. You can also trigger updates manually in **Settings > Updates** or upload a `.tar.gz` package.
 
 ## Links
 
-- **Website:** [www.vista-board.com](https://www.vista-board.com)
-- **Installation Guide:** [www.vista-board.com/installation](https://www.vista-board.com/installation)
-- **Releases:** [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases)
-- **Support:** support@vista-board.com
-
-## Related Projects
-
-- [Vista-PV](https://vista-pv.com) — Solar energy monitoring for Fronius inverters
-
----
-
-<p align="center">
-  Made with care in Germany
-</p>
+- Website: <https://www.vista-board.com>
+- Raspberry Pi calendar display: <https://www.vista-board.com/raspberry-pi-calendar-display/>
+- Installation guide: <https://www.vista-board.com/installation>
+- Latest release: <https://github.com/Masterzzz2/vistaboard-releases/releases/latest>
+- Tester page: <https://www.vista-board.com/tester/en/>
+- DAKboard alternative: <https://www.vista-board.com/dakboard-alternative/en/>
+- Support: support@vista-board.com
 
 ---
 
 # Deutsch
 
 <p align="center">
-  <strong>Verwandle deinen Raspberry Pi in ein smartes Wanddisplay.</strong><br>
-  Kalender, Wetter, Fotos, PV-Energie, Tibber-Strompreise — ein Bildschirm fuer alles.
+  <strong>Raspberry-Pi-Kalender und smartes Wanddisplay fuer Familie, Smart Home und PV-Haushalte.</strong><br>
+  Apple iCloud, Google Kalender, Wetter, Fotos, PV-Energie, Wallbox und Tibber-Strompreise — ein Bildschirm fuer alles.
 </p>
 
-## Was ist VistaBoard?
+<p align="center">
+  <a href="https://www.vista-board.com/installation"><strong>Installationsanleitung</strong></a> ·
+  <a href="https://github.com/Masterzzz2/vistaboard-releases/releases/latest"><strong>Aktuelles Release</strong></a> ·
+  <a href="https://www.vista-board.com/tester/"><strong>Tester werden</strong></a>
+</p>
 
-VistaBoard macht aus einem Raspberry Pi ein dauerhaft eingeschaltetes Wanddisplay fuer die ganze Familie. Es zeigt Kalender, Wetter, Fotos, Nachrichten — und optional PV-Daten, Hausakku, Wallbox und Strompreise.
+## Was ist Vista-Board?
 
-**Kein Programmieren. Keine Konfigurationsdateien. Einfach installieren und fertig.**
+Vista-Board macht aus einem Raspberry Pi oder Linux-Mini-PC ein dauerhaft sichtbares Wanddisplay. Es zeigt Familienkalender, Wetter, Fotos, Nachrichten und optional PV-Daten, Hausakku, Wallbox und Strompreise.
 
-## Fuer wen?
+Typische Einsaetze:
 
-- **Familien** — Gemeinsamer Kalender an der Kuechenwand
-- **Smart-Home-Nutzer** — Ein Dashboard fuer Wetter, Energie, Nachrichten
-- **PV-/Solaranlagen-Besitzer** — Fronius-Daten, Batterie, Netzbezug live
-- **E-Auto-Fahrer** — Wallbox-Status und Tibber-Strompreise auf einen Blick
-- **Bueros & Wartezimmer** — Professionelles Info-Display
-- **Digitaler Bilderrahmen** — Fotos von Bing, Unsplash, iCloud oder lokal
+- **digitaler Familienkalender** in Kueche oder Flur,
+- **Raspberry-Pi-Wandkalender** fuer Apple iCloud und Google Kalender,
+- **Smart-Home-Dashboard** mit Wetter, Fotos, Nachrichten und Erinnerungen,
+- **PV-/Solar-Dashboard** fuer Fronius, Hausakku, Wallbox und Tibber,
+- **Info-Display** fuer Buero, Wartezimmer, Lobby oder Ferienwohnung.
+
+**Kein Programmieren. Keine YAML-Dateien. Kein Cloud-Display-Konto fuer die Anzeige selbst.**
+
+## Download: welcher Weg ist richtig?
+
+| Wenn du ... | Nimm diesen Weg | Link |
+| --- | --- | --- |
+| moeglichst einfach starten willst | fertiges Raspberry-Pi-SD-Karten-Image | [SD-Image-Release](https://github.com/Masterzzz2/vistaboard-releases/releases/tag/sd-image) oder [Installationsseite](https://www.vista-board.com/installation) |
+| schon Raspberry Pi OS / Debian / Ubuntu installiert hast | Installationsskript | [Installationsanleitung](https://www.vista-board.com/installation) |
+| erst verstehen willst, was Vista-Board macht | Webseite und Screenshots | [vista-board.com](https://www.vista-board.com) |
+| Feedback geben und testen willst | Tester-Seite | [Tester werden](https://www.vista-board.com/tester/) |
+
+### Welche Datei brauche ich?
+
+- **Raspberry Pi 3 / 4 / 5:** `VistaBoard-RaspberryPi-64bit.img.xz` aus dem [SD-Image-Release](https://github.com/Masterzzz2/vistaboard-releases/releases/tag/sd-image) verwenden.
+- **Raspberry Pi 2B:** `VistaBoard-RaspberryPi-Pi2B-32bit.img.xz` aus dem [SD-Image-Release](https://github.com/Masterzzz2/vistaboard-releases/releases/tag/sd-image) verwenden.
+- **Mini-PC / vorhandenes Linux:** Installationsskript statt SD-Karten-Image verwenden.
+
+Wenn du unsicher bist, starte hier: <https://www.vista-board.com/installation>
 
 ## Funktionen
 
-- Apple iCloud, Google Calendar, CalDAV und beliebige iCal-URLs
-- Wettervorhersage mit Sonnenaufgang, Wetterwarnungen und Details
-- Fotos von Bing, Unsplash, iCloud oder lokalen Ordnern
-- RSS-Nachrichten, Zitate und eigene Info-Widgets
-- Fronius PV-Daten, Hausakku, Netzbezug/Einspeisung
-- Tibber-Strompreise, EPEX Spot, feste oder flexible Tarife
+- Apple iCloud, Google Kalender, Outlook, Nextcloud, CalDAV und beliebige iCal/ICS-URLs
+- mehrere Kalender mit eigenen Farben
+- Wettervorhersage, Sonnenaufgang, Sonnenuntergang und Wetterdetails
+- Fotos von Bing, Unsplash, iCloud/geteilten Ordnern oder lokalen Ordnern
+- RSS/Nachrichten, Zitate, Erinnerungen, Countdowns und eigene Widgets
+- Fronius-PV-Daten, Hausakku, Netzbezug/Einspeisung
 - Wallbox-/Ladestatus
+- Tibber-Strompreise, EPEX Spot, feste oder flexible Tarife
 - Hoch- und Querformat, dunkles/Pastell-/freies Layout
 - Deutsch und Englisch
-- 30-Tage-Testphase, danach ab 2,99 EUR/Monat
-- Automatische Updates mit Rollback-Sicherheit
+- automatische Updates mit Rollback-Sicherheit
+- 30-Tage-Testphase, danach Monats- oder Jahreslizenz
 
-## Schnellinstallation
-
-### Empfohlen: fertiges Pi-2B-Image
-
-Fuer Raspberry Pi 2 Model B verwende das getestete Release-Asset:
-
-`VistaBoard-Pi2B-32bit-2.8.28-FINAL.img.xz`
-
-1. Installiere den [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
-2. Waehle das Raspberry-Pi-2-Modell.
-3. Waehle **Eigenes Image verwenden** und dann die heruntergeladene `.img.xz`-Datei.
-4. Lege vor dem Schreiben Land, Sprache, Zeitzone, Benutzername, Passwort, WLAN und optional SSH im Raspberry Pi Imager fest.
-5. Schreibe die microSD-Karte, stecke sie in den Pi und schliesse Bildschirm, Netzwerk und Strom an.
-6. Falls der Raspberry-Pi-Willkommensassistent erscheint, fuehre ihn einmal zu Ende.
-7. VistaBoard installiert sich danach automatisch. Beim Pi 2B kann das 15-30 Minuten dauern.
-
-Download: [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases/latest)
-
-### Manuelle Installation
+## Schnellinstallation auf vorhandenem Raspberry Pi OS / Debian / Ubuntu
 
 ```bash
 curl -fsSL https://www.vista-board.com/downloads/vistaboard-install.sh -o vistaboard-install.sh
 sudo bash vistaboard-install.sh
 ```
 
-Dann `http://<PI-IP>:3000` im Browser oeffnen und dem Assistenten folgen.
+Danach `http://<PI-IP>:3000` im Browser oeffnen und dem Assistenten folgen.
 
-**Ausfuehrliche Anleitung:** [www.vista-board.com/installation](https://www.vista-board.com/installation)
+Ausfuehrliche Anleitung: <https://www.vista-board.com/installation>
 
 ## Preise
 
-| Tarif | Preis | |
-|-------|-------|-|
-| **Kostenlose Testphase** | 30 Tage, alle Funktionen | Keine Kreditkarte noetig |
-| **Monatlich** | 2,99 EUR/Monat | Jederzeit kuendbar |
-| **Jaehrlich** | 29,49 EUR/Jahr | 18% Ersparnis |
+| Plan | Preis | Hinweis |
+|------|-------|---------|
+| **Testphase** | 30 Tage | alle Funktionen, ohne Zahlungsdaten fuer den Test |
+| **Monatlich** | 2,99 EUR/Monat | jederzeit kuendbar |
+| **Jaehrlich** | 29,49 EUR/Jahr | guenstiger als monatlich |
+
+Aktivierung direkt in Vista-Board per PayPal. Eine Lizenz pro Geraet.
 
 ## Links
 
-- **Homepage:** [www.vista-board.com](https://www.vista-board.com)
-- **Installationsanleitung:** [www.vista-board.com/installation](https://www.vista-board.com/installation)
-- **Releases:** [GitHub Releases](https://github.com/Masterzzz2/vistaboard-releases/releases)
-- **Support:** support@vista-board.com
+- Webseite: <https://www.vista-board.com>
+- Installation: <https://www.vista-board.com/installation>
+- Aktuelles Release: <https://github.com/Masterzzz2/vistaboard-releases/releases/latest>
+- Tester-Seite: <https://www.vista-board.com/tester/>
+- DAKboard-Alternative: <https://www.vista-board.com/dakboard-alternative/>
+- Support: support@vista-board.com
+
+---
+
+<p align="center">
+  Made with care in Germany
+</p>
